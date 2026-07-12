@@ -1,0 +1,6 @@
+{
+  "name": "Rental Property Management System",
+  "description": "A comprehensive, highly polished full-scale dashboard for managing buildings, floors, apartments, tenants, rent collections, contract renewals, and automated rent increases with deep analytics and reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
