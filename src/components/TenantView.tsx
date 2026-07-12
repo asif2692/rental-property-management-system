@@ -6,6 +6,7 @@ import {
   Eye, Edit2, Trash2, X, Check, AlertCircle, ShieldAlert 
 } from 'lucide-react';
 import { Tenant, Apartment, Building, UserRole } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface TenantViewProps {
   tenants: Tenant[];
@@ -15,6 +16,7 @@ interface TenantViewProps {
   onAddTenant: (t: Omit<Tenant, 'id'>) => boolean; // returns success
   onUpdateTenant: (t: Tenant) => boolean; // returns success
   onDeleteTenant: (id: string) => void;
+  onShowAlert?: (options: any) => void;
 }
 
 export default function TenantView({
@@ -24,8 +26,10 @@ export default function TenantView({
   userRole,
   onAddTenant,
   onUpdateTenant,
-  onDeleteTenant
+  onDeleteTenant,
+  onShowAlert
 }: TenantViewProps) {
+  const { t } = useTranslation();
   const isReadOnly = userRole === 'read_only';
   const canDelete = userRole === 'admin' || userRole === 'landlord';
 
@@ -165,24 +169,60 @@ export default function TenantView({
 
     // 1. Validation Checks
     if (!fullName || !cnic || !mobileNumber || !apartmentId) {
-      setFormError('Please fill out all required field markers (*).');
+      const errMsg = 'Please fill out all required field markers (*). / براہ کرم تمام لازمی فیلڈز پُر کریں۔';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Missing Fields / معلومات نامکمل ہے',
+          text: 'Please fill out all required fields marked with (*).\nبراہ کرم تمام لازمی معلومات فراہم کریں۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      }
       return;
     }
 
     if (!validateCNIC(cnic)) {
-      setFormError('Invalid CNIC format. Required: XXXXX-XXXXXXX-X');
+      const errMsg = 'Invalid CNIC format. Required: XXXXX-XXXXXXX-X';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Invalid CNIC / غلط شناختی کارڈ نمبر',
+          text: 'Invalid CNIC format. Please enter as: XXXXX-XXXXXXX-X\nبراہ کرم شناختی کارڈ نمبر درست فارمیٹ میں لکھیں۔',
+          confirmButtonText: 'Correct it / درست کریں'
+        });
+      }
       return;
     }
 
     if (!validatePhone(mobileNumber)) {
-      setFormError('Invalid Pakistan mobile format. Required: 03XX-XXXXXXX or 03XXXXXXXXX');
+      const errMsg = 'Invalid Pakistan mobile format. Required: 03XX-XXXXXXX or 03XXXXXXXXX';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Invalid Phone Number / غلط موبائل نمبر',
+          text: 'Please use a valid Pakistani mobile number format (e.g. 03001234567 or 0300-1234567).\nبراہ کرم موبائل نمبر درست لکھیں۔',
+          confirmButtonText: 'Correct it / درست کریں'
+        });
+      }
       return;
     }
 
     // 2. Duplicate CNIC check (excluding the tenant being edited)
     const duplicateCNIC = tenants.some(t => t.cnic === cnic && t.id !== editingTenant?.id);
     if (duplicateCNIC) {
-      setFormError('This CNIC number is already registered in the system.');
+      const errMsg = 'This CNIC number is already registered in the system.';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'error',
+          title: 'Duplicate CNIC / شناختی کارڈ پہلے سے موجود ہے',
+          text: 'This CNIC number is already registered for another tenant.\nیہ شناختی کارڈ نمبر پہلے ہی رجسٹرڈ ہے۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      }
       return;
     }
 
@@ -191,7 +231,16 @@ export default function TenantView({
       t => t.apartmentId === apartmentId && t.active && t.id !== editingTenant?.id
     );
     if (alreadyAssigned && active) {
-      setFormError('This apartment is already occupied by an active tenant.');
+      const errMsg = 'This apartment is already occupied by an active tenant.';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'error',
+          title: 'Apartment Occupied / فلیٹ پہلے سے بک ہے',
+          text: 'This apartment/house is already occupied by another active tenant.\nیہ فلیٹ/مکان پہلے ہی کسی اور کرایہ دار کے پاس ہے۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      }
       return;
     }
 
@@ -231,8 +280,27 @@ export default function TenantView({
 
     if (success) {
       setShowFormModal(false);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'success',
+          title: editingTenant ? 'Profile Updated / تبدیلی کامیاب' : 'Tenant Registered / اندراج کامیاب',
+          text: editingTenant
+            ? 'Tenant details have been updated successfully in the system.'
+            : 'New tenant has been registered successfully.',
+          confirmButtonText: 'Perfect / بہترین'
+        });
+      }
     } else {
-      setFormError('Operation failed due to duplicate database values.');
+      const errMsg = 'Operation failed due to database or duplicate values.';
+      setFormError(errMsg);
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'error',
+          title: 'Saving Failed / محفوظ کرنے میں ناکامی',
+          text: 'Database operation failed. Please verify connection and ensure there are no duplicates.\nڈیٹا بیس میں محفوظ کرنے میں ناکامی ہوئی۔',
+          confirmButtonText: 'Try Again / دوبارہ کوشش کریں'
+        });
+      }
     }
   };
 
@@ -262,9 +330,9 @@ export default function TenantView({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tenant Directory / کرایہ داروں کی فہرست</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('Tenant Directory / کرایہ داروں کی فہرست')}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-            Store and review lease agreements, CNICs, and emergency info / معاہدے، شناختی کارڈز اور ایمرجنسی نمبرز کا ریکارڈ
+            {t('Store and review lease agreements, CNICs, and emergency info / معاہدے، شناختی کارڈز اور ایمرجنسی نمبرز کا ریکارڈ')}
           </p>
         </div>
         {!isReadOnly && (
@@ -273,7 +341,7 @@ export default function TenantView({
             className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 transition-colors text-white py-2 px-4 rounded-xl text-sm font-semibold cursor-pointer shadow-lg shadow-emerald-500/10"
           >
             <Plus className="w-4 h-4" />
-            Register Tenant / کرایہ دار کا اندراج
+            {t('Register Tenant / کرایہ دار کا اندراج')}
           </button>
         )}
       </div>
@@ -426,12 +494,12 @@ export default function TenantView({
       {/* DETAIL MODAL */}
       <AnimatePresence>
         {selectedTenant && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <button 
                 onClick={() => setSelectedTenant(null)} 
@@ -549,12 +617,12 @@ export default function TenantView({
       {/* FORM MODAL */}
       <AnimatePresence>
         {showFormModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/50">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">

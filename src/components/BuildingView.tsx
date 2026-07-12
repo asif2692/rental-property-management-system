@@ -5,6 +5,7 @@ import {
   Trash2, MapPin, AlignLeft, Info, HelpCircle, Save, X 
 } from 'lucide-react';
 import { Building, Floor, Apartment, UserRole } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface BuildingViewProps {
   buildings: Building[];
@@ -20,6 +21,7 @@ interface BuildingViewProps {
   onAddApartment: (a: Omit<Apartment, 'id'>) => void;
   onUpdateApartment: (a: Apartment) => void;
   onDeleteApartment: (id: string) => void;
+  onShowAlert?: (options: any) => void;
 }
 
 export default function BuildingView({
@@ -35,8 +37,10 @@ export default function BuildingView({
   onDeleteFloor,
   onAddApartment,
   onUpdateApartment,
-  onDeleteApartment
+  onDeleteApartment,
+  onShowAlert
 }: BuildingViewProps) {
+  const { t } = useTranslation();
   const isReadOnly = userRole === 'read_only';
   const canDelete = userRole === 'admin' || userRole === 'landlord';
 
@@ -188,9 +192,9 @@ export default function BuildingView({
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Properties & Hierarchy / جائیدادیں اور عمارتیں</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('Properties & Hierarchy / جائیدادیں اور عمارتیں')}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-            Construct buildings, floors, and dynamic apartment assignments / عمارتوں، منزلوں اور فلیٹوں کی تفصیل
+            {t('Construct buildings, floors, and dynamic apartment assignments / عمارتوں، منزلوں اور فلیٹوں کی تفصیل')}
           </p>
         </div>
         {!isReadOnly && (
@@ -199,7 +203,7 @@ export default function BuildingView({
             className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 transition-colors text-white py-2 px-4 rounded-xl text-sm font-semibold cursor-pointer shadow-lg shadow-emerald-500/10"
           >
             <Plus className="w-4 h-4" />
-            Add Building / عمارت شامل کریں
+            {t('Add Building / عمارت شامل کریں')}
           </button>
         )}
       </div>
@@ -423,12 +427,12 @@ export default function BuildingView({
       {/* BUILDING MODAL */}
       <AnimatePresence>
         {showBuildingModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -509,12 +513,12 @@ export default function BuildingView({
       {/* FLOOR MODAL */}
       <AnimatePresence>
         {showFloorModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -580,12 +584,12 @@ export default function BuildingView({
       {/* APARTMENT MODAL */}
       <AnimatePresence>
         {showAptModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">

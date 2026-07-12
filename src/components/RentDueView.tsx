@@ -6,6 +6,7 @@ import {
   MessageSquare, Mail, Copy, Send
 } from 'lucide-react';
 import { Tenant, Apartment, Building, RentPayment, RentIncreaseHistory, UserRole } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface RentDueViewProps {
   tenants: Tenant[];
@@ -17,6 +18,7 @@ interface RentDueViewProps {
   onApplyRentIncrease: (tenantId: string, percentage: number, remarks: string) => void;
   onRenewContract: (tenantId: string, newEndDate: string, rentAmount: number) => void;
   onAddLog?: (action: string, details: string) => void;
+  onShowAlert?: (options: any) => void;
 }
 
 export default function RentDueView({
@@ -28,8 +30,10 @@ export default function RentDueView({
   userRole,
   onApplyRentIncrease,
   onRenewContract,
-  onAddLog
+  onAddLog,
+  onShowAlert
 }: RentDueViewProps) {
+  const { t } = useTranslation();
   const isReadOnly = userRole === 'read_only';
 
   const [activeSubTab, setActiveSubTab] = useState<'due' | 'increase' | 'renewals'>('due');
@@ -223,26 +227,64 @@ export default function RentDueView({
 
     const percent = increasePercent === 0 ? Number(customPercent) : increasePercent;
     if (percent <= 0 || isNaN(percent)) {
-      alert('Please enter a valid growth percentage.');
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Invalid Percentage / غلط شرحِ اضافہ',
+          text: 'Please enter a valid growth percentage greater than zero.\nبراہ کرم اضافے کی درست شرح درج کریں۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      } else {
+        alert('Please enter a valid growth percentage.');
+      }
       return;
     }
 
     onApplyRentIncrease(selectedTenantId, percent, increaseRemarks);
     setSelectedTenantId('');
     setCustomPercent('');
-    alert('Rent increase successfully registered and applied to future collections.');
+
+    if (onShowAlert) {
+      onShowAlert({
+        type: 'success',
+        title: 'Rent Increased / کرایہ بڑھا دیا گیا',
+        text: `Rent increase of ${percent}% successfully registered and applied to future collections.\nکرائے میں اضافہ کامیابی سے لاگو ہو گیا ہے۔`,
+        confirmButtonText: 'Excellent / بہترین'
+      });
+    } else {
+      alert('Rent increase successfully registered and applied to future collections.');
+    }
   };
 
   const handleRenewContract = (e: React.FormEvent) => {
     e.preventDefault();
     if (!renewTenantId || !renewEndDate || renewRent <= 0) {
-      alert('Please specify all renewal terms.');
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Incomplete Terms / نامکمل معلومات',
+          text: 'Please specify all renewal terms (valid date and rent rate).\nبراہ کرم تجدید کی تمام معلومات پُر کریں۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      } else {
+        alert('Please specify all renewal terms.');
+      }
       return;
     }
 
     onRenewContract(renewTenantId, renewEndDate, Number(renewRent));
     setRenewTenantId('');
-    alert('Agreement contract extended successfully.');
+
+    if (onShowAlert) {
+      onShowAlert({
+        type: 'success',
+        title: 'Contract Extended / معاہدے کی تجدید',
+        text: 'Agreement contract extended successfully with new rent rate.\nکرایہ نامہ معاہدے کی کامیابی سے تجدید کر دی گئی ہے۔',
+        confirmButtonText: 'Perfect / بہترین'
+      });
+    } else {
+      alert('Agreement contract extended successfully.');
+    }
   };
 
   return (
@@ -251,17 +293,17 @@ export default function RentDueView({
       {/* Tab controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-2 border-b border-slate-100 dark:border-slate-700/50">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Due & Leases Control Room / واجبات اور تجدید معاہدہ</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('Due & Leases Control Room / واجبات اور تجدید معاہدہ')}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-            Monitor lease bounds, initiate auto-indexed rent increases, and renew agreements / کرایہ داری، واجبات اور کرایہ میں سالانہ اضافہ کا انتظام
+            {t('Monitor lease bounds, initiate auto-indexed rent increases, and renew agreements / کرایہ داری، واجبات اور کرایہ میں سالانہ اضافہ کا انتظام')}
           </p>
         </div>
 
         <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 shrink-0">
           {[
-            { id: 'due', label: 'Rent Due / بقایا جات', icon: Clock },
-            { id: 'increase', label: 'Rent Increase / کرایہ اضافہ', icon: TrendingUp },
-            { id: 'renewals', label: 'Renewal / تجدید معاہدہ', icon: Calendar }
+            { id: 'due', label: t('Rent Due / بقایا جات'), icon: Clock },
+            { id: 'increase', label: t('Rent Increase / کرایہ اضافہ'), icon: TrendingUp },
+            { id: 'renewals', label: t('Renewal / تجدید معاہدہ'), icon: Calendar }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -308,13 +350,13 @@ export default function RentDueView({
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xs font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                      Lease Expiry Warning Center / معاہدہ کی معیاد ختم ہونے کے الرٹس
+                      {t('Lease Expiry Warning Center / معاہدہ کی معیاد ختم ہونے کے الرٹس')}
                       <span className="bg-amber-500 text-white font-bold font-mono px-1.5 py-0.5 rounded text-[9px]">
                         {expiringSoonList.length} Active
                       </span>
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      The following active tenants' contracts are expiring within 30 days or have already expired. Action required to prevent uncontracted occupancy.
+                      {t("The following active tenants' contracts are expiring within 30 days or have already expired. Action required to prevent uncontracted occupancy. / درج ذیل کرایہ داروں کے معاہدے 30 دن میں ختم ہو رہے ہیں یا ختم ہو چکے ہیں۔ غیر قانونی رہائش کو روکنے کے لیے کارروائی کی ضرورت ہے۔")}
                     </p>
 
                     <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -387,12 +429,12 @@ export default function RentDueView({
                             {r.tenantName}
                             {r.isLeaseExpired && (
                               <span className="text-[9px] font-bold bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded font-sans uppercase animate-pulse">
-                                Expired / زائد المیعاد
+                                {t('Expired / زائد المیعاد')}
                               </span>
                             )}
                             {r.isLeaseExpiringSoon && (
                               <span className="text-[9px] font-bold bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded font-sans uppercase">
-                                Expiring ({r.daysUntilLeaseExpiry}d)
+                                {t('Expiring / معیاد ختم ہو رہی ہے')} ({r.daysUntilLeaseExpiry}d)
                               </span>
                             )}
                           </span>
@@ -814,21 +856,21 @@ export default function RentDueView({
       {/* LEASE RENEWAL NOTIFICATION DESK MODAL */}
       <AnimatePresence>
         {notifyingTenant && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto select-none font-sans">
+          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-start justify-center p-4 z-50 overflow-y-auto select-none font-sans sm:items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden"
+              className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden relative my-auto sm:my-8"
             >
               {/* Modal Header */}
               <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div>
                   <h3 className="font-extrabold text-sm flex items-center gap-1.5 text-indigo-400">
                     <Zap className="w-4 h-4 text-amber-500 animate-pulse" />
-                    Lease Renewal Notification Desk / معاہدہ تجدید نوٹس ڈیسک
+                    {t('Lease Renewal Notification Desk / معاہدہ تجدید نوٹس ڈیسک')}
                   </h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Draft, customize, and transmit official contract renewal warnings</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{t('Draft, customize, and transmit official contract renewal warnings / معاہدہ کی تجدید کے نوٹس تیار اور روانہ کریں')}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -853,9 +895,9 @@ export default function RentDueView({
                       <Check className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-slate-800 dark:text-white text-sm">Notification Successfully Broadcasted!</h4>
+                      <h4 className="font-extrabold text-slate-800 dark:text-white text-sm">{t('Notification Successfully Broadcasted! / نوٹس کامیابی سے بھیج دیا گیا!')}</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                        The renewal alert notice was logged to the database system logs and simulated successfully.
+                        {t('The renewal alert notice was logged to the database system logs and simulated successfully. / معاہدہ کی تجدید کا نوٹس کامیابی سے سسٹم لاگ میں محفوظ کر لیا گیا ہے۔')}
                       </p>
                     </div>
                     <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl max-w-xs mx-auto text-[10px] text-slate-500 font-mono">
@@ -868,7 +910,7 @@ export default function RentDueView({
                       }}
                       className="bg-indigo-500 hover:bg-indigo-600 transition-colors text-white py-2 px-6 rounded-xl text-xs font-bold cursor-pointer"
                     >
-                      Done / ٹھیک ہے
+                      {t('Done / ٹھیک ہے')}
                     </button>
                   </motion.div>
                 ) : (
@@ -895,11 +937,11 @@ export default function RentDueView({
 
                     {/* Language Selector */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Select Language / زبان کا انتخاب کریں</label>
+                      <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">{t('Select Language / زبان کا انتخاب کریں')}</label>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { id: 'ur', label: 'Urdu / اردو' },
-                          { id: 'en', label: 'English / انگریزی' }
+                          { id: 'ur', label: t('Urdu / اردو') },
+                          { id: 'en', label: t('English / انگریزی') }
                         ].map((l) => (
                           <button
                             key={l.id}
@@ -919,24 +961,24 @@ export default function RentDueView({
 
                     {/* Template Selectors */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Choose Alert Vibe / نوٹس کا انداز</label>
+                      <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">{t('Choose Alert Vibe / نوٹس کا انداز')}</label>
                       <div className="grid grid-cols-3 gap-2">
                         {[
-                          { id: 'standard', label: 'Standard / عام' },
-                          { id: 'friendly', label: 'Friendly / دوستانہ' },
-                          { id: 'formal', label: 'Formal / سنجیدہ' }
-                        ].map((t) => (
+                          { id: 'standard', label: t('Standard / عام') },
+                          { id: 'friendly', label: t('Friendly / دوستانہ') },
+                          { id: 'formal', label: t('Formal / سنجیدہ') }
+                        ].map((tItem) => (
                           <button
-                            key={t.id}
+                            key={tItem.id}
                             type="button"
-                            onClick={() => setMsgTemplate(t.id as any)}
+                            onClick={() => setMsgTemplate(tItem.id as any)}
                             className={`py-1.5 text-center font-bold rounded-lg border text-[11px] transition-all cursor-pointer ${
-                              msgTemplate === t.id 
+                              msgTemplate === tItem.id 
                                 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' 
                                 : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-950'
                             }`}
                           >
-                            {t.label}
+                            {tItem.label}
                           </button>
                         ))}
                       </div>
@@ -945,8 +987,8 @@ export default function RentDueView({
                     {/* Message Draft Textarea */}
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Message Draft / تحریر</label>
-                        <span className="text-[9px] text-slate-400">Editable / قابل ترمیم</span>
+                        <label className="text-[10px] uppercase font-bold text-slate-400">{t('Message Draft / تحریر')}</label>
+                        <span className="text-[9px] text-slate-400">{t('Editable / قابل ترمیم')}</span>
                       </div>
                       <textarea
                         value={customMsg}
@@ -959,7 +1001,7 @@ export default function RentDueView({
 
                     {/* Send Channels Grid */}
                     <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Select Transmission Channel / چینل کا انتخاب کریں</span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t('Select Transmission Channel / چینل کا انتخاب کریں')}</span>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {/* WhatsApp */}
                         <button
@@ -985,7 +1027,7 @@ export default function RentDueView({
                           type="button"
                           onClick={() => {
                             const emailAddress = notifyingTenant.tenantEmail || '';
-                            const subject = encodeURIComponent('Urgent: Lease Renewal Notice / کرایہ داری معاہدہ کی تجدید کا نوٹس');
+                            const subject = encodeURIComponent(t('Urgent: Lease Renewal Notice / کرایہ داری معاہدہ کی تجدید کا نوٹس'));
                             const encodedBody = encodeURIComponent(customMsg);
                             if (onAddLog) {
                               onAddLog('SEND_RENEWAL_NOTICE', `Sent lease renewal notice email to ${notifyingTenant.tenantName} (${emailAddress}) for Unit ${notifyingTenant.apartmentNumber}.`);
@@ -1007,7 +1049,16 @@ export default function RentDueView({
                             if (onAddLog) {
                               onAddLog('SEND_RENEWAL_NOTICE', `Copied contract renewal alert to clipboard for tenant: ${notifyingTenant.tenantName}`);
                             }
-                            alert('Renewal message copied to clipboard!');
+                            if (onShowAlert) {
+                              onShowAlert({
+                                type: 'success',
+                                title: 'Copied / کاپی ہو گیا',
+                                text: 'Renewal notification message has been copied to your clipboard.\nتجدید کا پیغام کامیابی سے کاپی کر لیا گیا ہے۔',
+                                confirmButtonText: 'OK / ٹھیک ہے'
+                              });
+                            } else {
+                              alert('Renewal message copied to clipboard!');
+                            }
                           }}
                           className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-2 px-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all font-semibold"
                         >

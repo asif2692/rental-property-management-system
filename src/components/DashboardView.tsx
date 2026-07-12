@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { SystemMetrics } from '../utils/calculations';
 import { Tenant, RentPayment, Apartment } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface DashboardViewProps {
   metrics: SystemMetrics;
@@ -31,6 +32,7 @@ export default function DashboardView({
   buildingWiseIncome,
   collectionTrend
 }: DashboardViewProps) {
+  const { t } = useTranslation();
 
   // Colors for charts (Polished corporate Indigo & Slate palette)
   const COLORS = ['#6366f1', '#94a3b8', '#f59e0b', '#3b82f6', '#8b5cf6'];
@@ -59,9 +61,9 @@ export default function DashboardView({
   };
 
   const occupancyPieData = [
-    { name: 'Occupied', value: metrics.occupiedCount },
-    { name: 'Vacant', value: metrics.vacantCount },
-    { name: 'Maintenance', value: metrics.maintenanceCount }
+    { name: t('Occupied / کرایہ پر ہے'), value: metrics.occupiedCount },
+    { name: t('Vacant / خالی ہے'), value: metrics.vacantCount },
+    { name: t('Maintenance / مرمت ہو رہی ہے'), value: metrics.maintenanceCount }
   ];
 
   return (
@@ -71,15 +73,15 @@ export default function DashboardView({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Property Dashboard / پراپرٹی ڈیش بورڈ
+            {t('Property Dashboard / پراپرٹی ڈیش بورڈ')}
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Real-time analytics and financial forecasting / ریئل ٹائم تجزیات اور مالیاتی پیش گوئی
+            {t('Real-time analytics and financial forecasting / ریئل ٹائم تجزیات اور مالیاتی پیش گوئی')}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 py-1.5 px-3 rounded-full border border-indigo-100 dark:border-indigo-900/40">
           <Database className="w-3.5 h-3.5 animate-pulse" />
-          <span>Pandas & NumPy Engines Live / شماریاتی انجن</span>
+          <span>{t('Pandas & NumPy Engines Live / شماریاتی انجن')}</span>
         </div>
       </div>
 
@@ -125,7 +127,7 @@ export default function DashboardView({
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider block">
-                  {kpi.title}
+                  {t(kpi.title)}
                 </span>
                 <span className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mt-1 block">
                   {kpi.val}
@@ -136,7 +138,7 @@ export default function DashboardView({
               </div>
             </div>
             <div className="border-t border-slate-100 dark:border-slate-700/50 mt-4 pt-2.5 text-xs text-slate-400 dark:text-slate-400 font-mono">
-              {kpi.desc}
+              {t(kpi.desc)}
             </div>
           </motion.div>
         ))}
@@ -188,7 +190,7 @@ export default function DashboardView({
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider block">
-                  {fKpi.title}
+                  {t(fKpi.title)}
                 </span>
                 <span className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-white mt-1 block font-mono">
                   {fKpi.val}
@@ -199,7 +201,7 @@ export default function DashboardView({
               </div>
             </div>
             <div className="mt-4 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400">
-              {fKpi.desc}
+              {t(fKpi.desc)}
             </div>
           </motion.div>
         ))}
@@ -219,42 +221,42 @@ export default function DashboardView({
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-lg">Statistical Analysis Models (NumPy Engine) / شماریاتی تجزیہ ماڈل</h3>
-            <p className="text-xs text-slate-400">Calculated across dynamic properties / میٹرکس پر مبنی تقسیم کا خودکار حساب</p>
+            <h3 className="font-bold text-lg">{t('Statistical Analysis Models (NumPy Engine) / شماریاتی تجزیہ ماڈل')}</h3>
+            <p className="text-xs text-slate-400">{t('Calculated across dynamic properties / میٹرکس پر مبنی تقسیم کا خودکار حساب')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
           <div className="border-r border-slate-700/50 last:border-0 pr-4">
-            <span className="text-xs text-slate-400 uppercase tracking-wider block">Average Rent / اوسط کرایہ</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Average Rent / اوسط کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-emerald-400 block mt-1">
               {formatPKR(Math.round(metrics.averageRent))}
             </span>
-            <span className="text-[10px] text-slate-500">Arithmetic Mean / اوسط قیمت</span>
+            <span className="text-[10px] text-slate-500">{t('Arithmetic Mean / اوسط قیمت')}</span>
           </div>
 
           <div className="border-r border-slate-700/50 last:border-0 pr-4">
-            <span className="text-xs text-slate-400 uppercase tracking-wider block">Median Rent / درمیانی کرایہ</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Median Rent / درمیانی کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-indigo-400 block mt-1">
               {formatPKR(Math.round(metrics.medianRent))}
             </span>
-            <span className="text-[10px] text-slate-500">50th Percentile / درمیانی شرح</span>
+            <span className="text-[10px] text-slate-500">{t('50th Percentile / درمیانی شرح')}</span>
           </div>
 
           <div className="border-r border-slate-700/50 last:border-0 pr-4">
-            <span className="text-xs text-slate-400 uppercase tracking-wider block">Maximum Rent / زیادہ سے زیادہ کرایہ</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Maximum Rent / زیادہ سے زیادہ کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-amber-400 block mt-1">
               {formatPKR(metrics.maxRent)}
             </span>
-            <span className="text-[10px] text-slate-500">Max Peak / سب سے زیادہ کرایہ</span>
+            <span className="text-[10px] text-slate-500">{t('Max Peak / سب سے زیادہ کرایہ')}</span>
           </div>
 
           <div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider block">Minimum Rent / کم سے کم کرایہ</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Minimum Rent / کم سے کم کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-sky-400 block mt-1">
               {formatPKR(metrics.minRent)}
             </span>
-            <span className="text-[10px] text-slate-500">Min Floor / سب سے کم کرایہ</span>
+            <span className="text-[10px] text-slate-500">{t('Min Floor / سب سے کم کرایہ')}</span>
           </div>
         </div>
       </motion.div>
@@ -266,11 +268,11 @@ export default function DashboardView({
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm col-span-1 lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white text-base">Monthly Income Collection Trends / ماہانہ آمدنی کا رجحان</h3>
-              <p className="text-xs text-slate-400">Tracking rental cashflows and late charges collections / کرایہ اور تاخیر چارجز کا چارٹ</p>
+              <h3 className="font-bold text-slate-800 dark:text-white text-base">{t('Monthly Income Collection Trends / ماہانہ آمدنی کا رجحان')}</h3>
+              <p className="text-xs text-slate-400">{t('Tracking rental cashflows and late charges collections / کرایہ اور تاخیر چارجز کا چارٹ')}</p>
             </div>
             <span className="text-[10px] bg-slate-100 dark:bg-slate-700 font-mono py-1 px-2.5 rounded text-slate-500 dark:text-slate-400">
-              Year 2026
+              {t('Year 2026 / سال 2026')}
             </span>
           </div>
           <div className="h-80">
@@ -300,8 +302,8 @@ export default function DashboardView({
 
         {/* Occupancy Rate Pie */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm">
-          <h3 className="font-bold text-slate-800 dark:text-white text-base mb-1">Occupancy Rates</h3>
-          <p className="text-xs text-slate-400 mb-6">Portfolio composition and unit statuses</p>
+          <h3 className="font-bold text-slate-800 dark:text-white text-base mb-1">{t('Occupancy Rates / رہائشی تناسب')}</h3>
+          <p className="text-xs text-slate-400 mb-6">{t('Portfolio composition and unit statuses / فلیٹوں کے کرائے کا تناسب')}</p>
           <div className="h-64 flex items-center justify-center relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -328,7 +330,7 @@ export default function DashboardView({
                 {Math.round(metrics.occupancyRate)}%
               </span>
               <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
-                Occupied
+                {t('Occupied / کرایہ دار')}
               </span>
             </div>
           </div>
@@ -350,8 +352,8 @@ export default function DashboardView({
 
       {/* Building-wise performance */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm">
-        <h3 className="font-bold text-slate-800 dark:text-white text-base mb-1">Building Cashflow Distributions</h3>
-        <p className="text-xs text-slate-400 mb-6">Total rental collections across distinct real estate holdings</p>
+        <h3 className="font-bold text-slate-800 dark:text-white text-base mb-1">{t('Building Cashflow Distributions / عمارت کے لحاظ سے کرائے کی وصولی')}</h3>
+        <p className="text-xs text-slate-400 mb-6">{t('Total rental collections across distinct real estate holdings / جائیدادوں کے لحاظ سے ماہانہ وصولیاں')}</p>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={buildingWiseIncome}>
@@ -369,8 +371,8 @@ export default function DashboardView({
                 }} 
               />
               <Legend verticalAlign="top" height={32} iconType="circle" fontSize={12} />
-              <Bar dataKey="income" name="PKR Income Received" fill="#3b82f6" radius={[8, 8, 0, 0]} barSize={40} />
-              <Bar dataKey="occupancyRate" name="Occupancy %" fill="#10b981" radius={[8, 8, 0, 0]} barSize={20} />
+              <Bar dataKey="income" name={t('PKR Income Received / وصول شدہ رقم')} fill="#3b82f6" radius={[8, 8, 0, 0]} barSize={40} />
+              <Bar dataKey="occupancyRate" name={t('Occupancy % / شرح رہائش')} fill="#10b981" radius={[8, 8, 0, 0]} barSize={20} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -384,14 +386,14 @@ export default function DashboardView({
           <div>
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-base">Latest Payments</h3>
-                <p className="text-xs text-slate-400">Recently registered monthly rent collection events</p>
+                <h3 className="font-bold text-slate-800 dark:text-white text-base">{t('Latest Payments / تازہ ترین ادائیگیاں')}</h3>
+                <p className="text-xs text-slate-400">{t('Recently registered monthly rent collection events / حال ہی میں وصول ہونے والے کرائے کا ریکارڈ')}</p>
               </div>
               <button 
                 onClick={() => onNavigate('rent')}
                 className="text-xs text-indigo-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
               >
-                View History <ArrowRight className="w-3.5 h-3.5" />
+                {t('View History / ریکارڈ دیکھیں')} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
             
@@ -407,10 +409,10 @@ export default function DashboardView({
                       </div>
                       <div>
                         <span className="text-xs font-semibold text-slate-800 dark:text-white block">
-                          {tenant ? tenant.fullName : 'Unknown Tenant'}
+                          {tenant ? tenant.fullName : t('Unknown Tenant / نامعلوم کرایہ دار')}
                         </span>
                         <span className="text-[10px] text-slate-400 block font-mono">
-                          {apt ? apt.number : 'Apt'} - Month {p.rentMonth}/{p.rentYear}
+                          {apt ? apt.number : 'Apt'} - {t('Month / مہینہ')} {p.rentMonth}/{p.rentYear}
                         </span>
                       </div>
                     </div>
@@ -427,7 +429,7 @@ export default function DashboardView({
               })}
               {latestPayments.length === 0 && (
                 <div className="text-center py-6 text-slate-400 text-sm font-mono">
-                  No rent collections recorded yet.
+                  {t('No rent collections recorded yet. / ابھی تک کوئی کرایہ درج نہیں کیا گیا۔')}
                 </div>
               )}
             </div>
@@ -439,23 +441,23 @@ export default function DashboardView({
           <div>
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-base">Contract Renewals Alert</h3>
-                <p className="text-xs text-slate-400">Leases expiring in the next 30 days or already overdue</p>
+                <h3 className="font-bold text-slate-800 dark:text-white text-base">{t('Contract Renewals Alert / معاہدہ کی تجدید کا الرٹ')}</h3>
+                <p className="text-xs text-slate-400">{t('Leases expiring in the next 30 days or already overdue / اگلے 30 دنوں میں ختم ہونے والے معاہدے')}</p>
               </div>
               <button 
                 onClick={() => onNavigate('renewals')}
                 className="text-xs text-amber-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
               >
-                Manage Renewals <ArrowRight className="w-3.5 h-3.5" />
+                {t('Manage Renewals / معاہدوں کا انتظام کریں')} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
             
             <div className="space-y-3.5">
-              {upcomingRenewals.map((t) => {
-                const apt = apartments.find(a => a.id === t.apartmentId);
-                const isOverdue = t.diffDays < 0;
+              {upcomingRenewals.map((tenantItem) => {
+                const apt = apartments.find(a => a.id === tenantItem.apartmentId);
+                const isOverdue = tenantItem.diffDays < 0;
                 return (
-                  <div key={t.id} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:border-slate-200 transition-colors">
+                  <div key={tenantItem.id} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:border-slate-200 transition-colors">
                     <div className="flex items-center gap-3">
                       {isOverdue ? (
                         <div className="w-10 h-10 bg-rose-500/10 text-rose-500 flex items-center justify-center rounded-xl border border-rose-500/20">
@@ -468,25 +470,25 @@ export default function DashboardView({
                       )}
                       <div>
                         <span className="text-xs font-semibold text-slate-800 dark:text-white block">
-                          {t.fullName}
+                          {tenantItem.fullName}
                         </span>
                         <span className="text-[10px] text-slate-400 block font-mono">
-                          {apt ? apt.number : 'Apt'} - Exp: {t.endDate}
+                          {apt ? apt.number : 'Apt'} - Exp: {tenantItem.endDate}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
                       {isOverdue ? (
                         <span className="text-xs font-bold text-rose-500 block">
-                          Overdue {Math.abs(t.diffDays)}d
+                          {t('Overdue / تاخیر کا شکار')} {Math.abs(tenantItem.diffDays)}d
                         </span>
                       ) : (
                         <span className="text-xs font-bold text-amber-500 block">
-                          Due in {t.diffDays}d
+                          {t('Due in / باقی دن')} {tenantItem.diffDays}d
                         </span>
                       )}
                       <span className="text-[9px] text-slate-400 font-mono">
-                        Rent: {formatPKR(apt ? apt.monthlyRent : 0)}
+                        {t('Rent: / کرایہ:')} {formatPKR(apt ? apt.monthlyRent : 0)}
                       </span>
                     </div>
                   </div>
@@ -494,7 +496,7 @@ export default function DashboardView({
               })}
               {upcomingRenewals.length === 0 && (
                 <div className="text-center py-6 text-slate-400 text-sm font-mono">
-                  No upcoming renewals. Leases are fully up to date.
+                  {t('No upcoming renewals. Leases are fully up to date. / کوئی بقایا یا تجدید نہیں ہے۔ تمام معاہدے اپ ٹو ڈیٹ ہیں۔')}
                 </div>
               )}
             </div>

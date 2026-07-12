@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building2, Users, Receipt, CalendarClock, FileBarChart, 
-  Settings, LogOut, Sun, Moon, Database, Clock, ShieldAlert
+  Settings, LogOut, Sun, Moon, Database, Clock, ShieldAlert,
+  Menu, X
 } from 'lucide-react';
 
 import { 
@@ -36,6 +37,8 @@ import {
   computeSystemMetrics, getBuildingWiseIncome, getMonthlyCollectionTrend 
 } from './utils/calculations';
 
+import { useTranslation, translateText } from './utils/language';
+
 // Views
 import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView';
@@ -46,10 +49,13 @@ import RentDueView from './components/RentDueView';
 import ReportView from './components/ReportView';
 import ExtraFeaturesView from './components/ExtraFeaturesView';
 import TenantPortalView from './components/TenantPortalView';
+import { SweetAlert, SweetAlertOptions } from './components/SweetAlert';
 
 type TabType = 'dashboard' | 'properties' | 'tenants' | 'rent' | 'due' | 'reports' | 'extra' | 'tenant-portal';
 
 export default function App() {
+  const { language, setLanguage, t } = useTranslation();
+
   // Authentication state
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('rm_current_user');
@@ -108,12 +114,27 @@ export default function App() {
   const [isDbLoading, setIsDbLoading] = useState<boolean>(() => isSupabaseConfigured());
   const [dbSyncError, setDbSyncError] = useState<{ context: string; message: string; details?: string; hint?: string } | null>(null);
 
+  // SweetAlert state and trigger
+  const [alertOptions, setAlertOptions] = useState<SweetAlertOptions | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  const showAlert = (options: SweetAlertOptions) => {
+    setAlertOptions(options);
+    setIsAlertOpen(true);
+  };
+
   // Custom Event Listener to catch database sync warnings
   useEffect(() => {
     const handleSyncError = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail) {
         setDbSyncError(customEvent.detail);
+        showAlert({
+          type: 'error',
+          title: 'Database Sync Error / ڈیٹا بیس کی خرابی',
+          text: `There was a problem syncing data with Supabase.\n\nContext: ${customEvent.detail.context}\nMessage: ${customEvent.detail.message}\n\n* Please make sure RLS is disabled or required columns exist.`,
+          confirmButtonText: 'Understood / سمجھ گیا'
+        });
       }
     };
     window.addEventListener('supabase-db-error', handleSyncError);
@@ -148,6 +169,7 @@ export default function App() {
 
   // Current selected tab
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Time-ticking clock for header status bar
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -689,6 +711,113 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors flex font-sans select-none antialiased">
       
+      {/* MOBILE DRAWER NAVIGATION */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 flex md:hidden">
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+            />
+
+            {/* Sidebar content */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-72 max-w-[80vw] bg-slate-900 dark:bg-slate-950 border-r border-slate-800 dark:border-slate-900 h-full flex flex-col justify-between p-0 text-slate-400 z-10 shadow-2xl"
+            >
+              <div>
+                {/* Close button & Brand */}
+                <div className="p-6 border-b border-slate-800 dark:border-slate-900 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-500 rounded-lg text-white shadow-lg shadow-indigo-500/30">
+                      <Building2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-white tracking-tight text-sm block">Rental Elite</span>
+                      <span className="text-[10px] text-slate-500 block font-semibold">Management System</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Tab lists */}
+                <nav className="p-4 space-y-1">
+                  {(currentUser.role === 'tenant'
+                    ? [{ id: 'tenant-portal', label: 'My Rent Portal / میرا رینٹ پورٹل', icon: Receipt }]
+                    : [
+                        { id: 'dashboard', label: 'Dashboard / ڈیش بورڈ', icon: Building2 },
+                        { id: 'properties', label: 'Properties & Houses / جائیدادیں', icon: Settings },
+                        { id: 'tenants', label: 'Tenant Directory / کرایہ دار', icon: Users },
+                        { id: 'rent', label: 'Rent Ledger / کرایہ کا کھاتہ', icon: Receipt },
+                        { id: 'due', label: 'Due & Renewals / واجبات', icon: CalendarClock },
+                        { id: 'reports', label: 'Reports & Compiler / رپورٹ', icon: FileBarChart },
+                        { id: 'extra', label: 'Backup & Audit / بیک اپ اور آڈٹ', icon: Database }
+                      ]
+                  ).map((tab) => {
+                    const isSelected = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveTab(tab.id as any);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`w-full text-left py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-3 ${
+                          isSelected 
+                            ? 'bg-slate-800 text-white font-bold' 
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <tab.icon className={`w-4 h-4 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
+                        {t(tab.label)}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* User Identity bottom footer */}
+              <div className="p-4 border-t border-slate-800 dark:border-slate-900 space-y-3 bg-slate-950/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold font-mono text-sm uppercase">
+                    {currentUser.username.substring(0, 2)}
+                  </div>
+                  <div>
+                    <span className="font-bold text-white block text-xs truncate max-w-[120px]">{currentUser.username}</span>
+                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">
+                      {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 border border-slate-800 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all py-1.5 px-3 rounded-lg text-[10px] text-slate-400 font-bold cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  {t('End Session / سیشن ختم کریں')}
+                </button>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* SIDEBAR NAVIGATION */}
       <aside className="w-64 border-r border-slate-800 dark:border-slate-900 bg-slate-900 dark:bg-slate-950 flex flex-col justify-between shrink-0 h-screen sticky top-0 hidden md:flex text-slate-400">
         <div>
@@ -730,7 +859,7 @@ export default function App() {
                   }`}
                 >
                   <tab.icon className={`w-4 h-4 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {tab.label}
+                  {t(tab.label)}
                 </button>
               );
             })}
@@ -745,7 +874,9 @@ export default function App() {
             </div>
             <div>
               <span className="font-bold text-white block text-xs truncate max-w-[120px]">{currentUser.username}</span>
-              <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">{currentUser.role}</span>
+              <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">
+                {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
+              </span>
             </div>
           </div>
 
@@ -754,7 +885,7 @@ export default function App() {
             className="w-full inline-flex items-center justify-center gap-2 border border-slate-800 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all py-1.5 px-3 rounded-lg text-[10px] text-slate-400 font-bold cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            End Session
+            {t('End Session / سیشن ختم کریں')}
           </button>
         </div>
       </aside>
@@ -776,6 +907,30 @@ export default function App() {
           {/* Center/Right controls */}
           <div className="flex items-center gap-4">
             
+            {/* Language Switcher */}
+            <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 text-[10px] font-extrabold shadow-inner">
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                  language === 'en' 
+                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs' 
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLanguage('ur')}
+                className={`px-2 py-1 rounded-md transition-all font-sans cursor-pointer ${
+                  language === 'ur' 
+                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs' 
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                اردو
+              </button>
+            </div>
+
             {/* Dark Mode toggle */}
             <button
               onClick={() => setDarkMode(prev => !prev)}
@@ -784,31 +939,17 @@ export default function App() {
               {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Mobile Navigation Header Tabs inside Header */}
-            <div className="md:hidden flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg text-[10px] font-semibold border border-slate-200/50">
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value as any)}
-                className="bg-transparent border-0 font-bold text-slate-600 dark:text-slate-200 focus:outline-none py-1 px-2.5 cursor-pointer text-xs"
-              >
-                {currentUser.role === 'tenant' ? (
-                  <option value="tenant-portal">My Rent Portal / میرا رینٹ پورٹل</option>
-                ) : (
-                  <>
-                    <option value="dashboard">Dashboard / ڈیش بورڈ</option>
-                    <option value="properties">Properties / جائیدادیں</option>
-                    <option value="tenants">Tenants / کرایہ دار</option>
-                    <option value="rent">Rent Ledger / کرایہ کا کھاتہ</option>
-                    <option value="due">Due & Renewals / واجبات</option>
-                    <option value="reports">Reports / رپورٹ</option>
-                    <option value="extra">Logs & Backups / بیک اپ اور آڈٹ</option>
-                  </>
-                )}
-              </select>
-            </div>
+            {/* Mobile Navigation Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-950 text-indigo-600 dark:text-indigo-400 py-1.5 px-3 rounded-lg text-xs font-bold border border-indigo-100 dark:border-indigo-900/50 transition-all cursor-pointer shadow-xs"
+            >
+              <Menu className="w-3.5 h-3.5" />
+              <span>{t('Menu / مینیو')}</span>
+            </button>
 
             <span className="text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 dark:bg-slate-900 text-emerald-500 border border-emerald-500/20 py-1 px-2.5 rounded-lg font-mono">
-              Role: {currentUser.role}
+              {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
             </span>
           </div>
 
@@ -879,6 +1020,7 @@ export default function App() {
                   onAddApartment={handleAddApartment}
                   onUpdateApartment={handleUpdateApartment}
                   onDeleteApartment={handleDeleteApartment}
+                  onShowAlert={showAlert}
                 />
               )}
 
@@ -891,6 +1033,7 @@ export default function App() {
                   onAddTenant={handleAddTenant}
                   onUpdateTenant={handleUpdateTenant}
                   onDeleteTenant={handleDeleteTenant}
+                  onShowAlert={showAlert}
                 />
               )}
 
@@ -904,6 +1047,7 @@ export default function App() {
                   userRole={currentUser.role}
                   onRecordPayment={handleRecordPayment}
                   onDeletePayment={handleDeletePayment}
+                  onShowAlert={showAlert}
                 />
               )}
 
@@ -918,6 +1062,7 @@ export default function App() {
                   onApplyRentIncrease={handleApplyRentIncrease}
                   onRenewContract={handleRenewContract}
                   onAddLog={addLog}
+                  onShowAlert={showAlert}
                 />
               )}
 
@@ -959,6 +1104,13 @@ export default function App() {
         </section>
 
       </main>
+      
+      {/* SweetAlert Component */}
+      <SweetAlert 
+        isOpen={isAlertOpen} 
+        options={alertOptions} 
+        onClose={() => setIsAlertOpen(false)} 
+      />
 
     </div>
   );

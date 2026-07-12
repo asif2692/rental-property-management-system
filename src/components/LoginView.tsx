@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { KeyRound, ShieldAlert, Lock, User as UserIcon, UserCheck, ShieldCheck, UserPlus, CreditCard } from 'lucide-react';
 import { User, UserRole, Tenant } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface LoginViewProps {
   tenants: Tenant[];
@@ -9,6 +10,7 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
+  const { t, language, setLanguage } = useTranslation();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   
   // Sign In States
@@ -144,6 +146,32 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
+      {/* Language Switcher in Login Page */}
+      <div className="absolute top-4 right-4 flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[10px] font-extrabold shadow-inner z-20">
+        <button
+          type="button"
+          onClick={() => setLanguage('en')}
+          className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+            language === 'en' 
+              ? 'bg-indigo-600 text-white shadow-xs' 
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          EN
+        </button>
+        <button
+          type="button"
+          onClick={() => setLanguage('ur')}
+          className={`px-2.5 py-1 rounded-md transition-all font-sans cursor-pointer ${
+            language === 'ur' 
+              ? 'bg-indigo-600 text-white shadow-xs' 
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          اردو
+        </button>
+      </div>
+
       {/* Dynamic Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black opacity-90" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -164,7 +192,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             Rental Elite Portal
           </h2>
           <p className="text-slate-400 text-xs mt-2 font-medium">
-            ADMIN &bull; مالک مکان &bull; کرایہ دار
+            {t('Admin • Landlord • Tenant / ایڈمن • مالک مکان • کرایہ دار')}
           </p>
         </div>
 
@@ -180,7 +208,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             }`}
           >
             <UserCheck className="w-4 h-4" />
-            لاگ ان (Sign In)
+            {t('Sign In / لاگ ان')}
           </button>
           <button
             type="button"
@@ -192,7 +220,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             }`}
           >
             <UserPlus className="w-4 h-4" />
-            نیا اکاؤنٹ بنائیں (Sign Up)
+            {t('Sign Up / نیا اکاؤنٹ بنائیں')}
           </button>
         </div>
 
@@ -206,7 +234,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
               className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-300 text-xs whitespace-pre-line"
             >
               <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
-              <span>{error}</span>
+              <span>{t(error)}</span>
             </motion.div>
           )}
 
@@ -218,7 +246,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
               className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3 text-emerald-300 text-xs whitespace-pre-line"
             >
               <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
-              <span>{success}</span>
+              <span>{t(success)}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -228,8 +256,8 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
           <form onSubmit={handleSignIn} className="space-y-5">
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-2 flex justify-between">
-                <span>System Role / کردار</span>
-                <span className="text-indigo-400 text-[10px]">لاگ ان کے لیے کردار منتخب کریں</span>
+                <span>{t('System Role / کردار')}</span>
+                <span className="text-indigo-400 text-[10px]">{t('Select role for login / لاگ ان کے لیے کردار منتخب کریں')}</span>
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -267,8 +295,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800/50'
                     }`}
                   >
-                    <span className="text-xs">{label}</span>
-                    <span className="text-[10px] opacity-80">{urdu}</span>
+                    <span className="text-xs">{t(`${label} / ${urdu}`)}</span>
                   </button>
                 ))}
               </div>
@@ -276,7 +303,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
 
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-2">
-                Username / یوزر نیم
+                {t('Username / یوزر نیم')}
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -287,7 +314,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                   required
                   value={signInUsername}
                   onChange={(e) => setSignInUsername(e.target.value)}
-                  placeholder="Enter login username"
+                  placeholder={t('Enter login username / یوزر نیم درج کریں')}
                   className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all font-mono"
                 />
               </div>
@@ -295,7 +322,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
 
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-2">
-                Password / پاسورڈ
+                {t('Password / پاسورڈ')}
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -322,7 +349,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
               ) : (
                 <>
                   <UserCheck className="w-4 h-4" />
-                  محفوظ لاگ ان کریں (Sign In Securely)
+                  {t('Sign In Securely / محفوظ لاگ ان کریں')}
                 </>
               )}
             </button>
@@ -332,7 +359,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
           <form onSubmit={handleSignUp} className="space-y-4">
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-2">
-                Select Signup Role / کردار منتخب کریں
+                {t('Select Signup Role / کردار منتخب کریں')}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -350,8 +377,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800/50'
                     }`}
                   >
-                    <span className="text-xs">{label}</span>
-                    <span className="text-[10px] opacity-80">{urdu}</span>
+                    <span className="text-xs">{t(`${label} / ${urdu}`)}</span>
                   </button>
                 ))}
               </div>
@@ -359,7 +385,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
 
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-1.5">
-                Username / یوزر نیم
+                {t('Username / یوزر نیم')}
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -370,7 +396,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                   required
                   value={signUpUsername}
                   onChange={(e) => setSignUpUsername(e.target.value)}
-                  placeholder="Choose unique username"
+                  placeholder={t('Choose unique username / منفرد یوزر نیم منتخب کریں')}
                   className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all font-mono"
                 />
               </div>
@@ -378,7 +404,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
 
             <div>
               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-1.5">
-                Password / پاسورڈ
+                {t('Password / پاسورڈ')}
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -389,7 +415,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                   required
                   value={signUpPassword}
                   onChange={(e) => setSignUpPassword(e.target.value)}
-                  placeholder="Enter secure password"
+                  placeholder={t('Enter secure password / محفوظ پاسورڈ درج کریں')}
                   className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all font-mono"
                 />
               </div>
@@ -398,7 +424,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             {signUpRole !== 'tenant' ? (
               <div>
                 <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider mb-1.5">
-                  Full Name / پورا نام
+                  {t('Full Name / پورا نام')}
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -409,7 +435,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                     required={signUpRole !== 'tenant'}
                     value={signUpFullName}
                     onChange={(e) => setSignUpFullName(e.target.value)}
-                    placeholder="Enter full name"
+                    placeholder={t('Enter full name / پورا نام درج کریں')}
                     className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all"
                   />
                 </div>
@@ -421,8 +447,8 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                 className="space-y-1.5"
               >
                 <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider flex justify-between">
-                  <span>NIC / CNIC Number (شناختی کارڈ نمبر)</span>
-                  <span className="text-amber-400 font-semibold text-[10px]">لازمی تصدیق</span>
+                  <span>{t('NIC / CNIC Number / شناختی کارڈ نمبر')}</span>
+                  <span className="text-amber-400 font-semibold text-[10px]">{t('Required Verification / لازمی تصدیق')}</span>
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
@@ -438,7 +464,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                   />
                 </div>
                 <p className="text-[10px] text-amber-400/90 leading-relaxed pt-1">
-                  * کرایہ دار کا اکاؤنٹ بنانے کے لیے وہ شناختی کارڈ نمبر لکھیں جو مالک مکان نے درج کیا ہوا ہے۔ نام خود بخود ڈیٹا بیس سے مل جائے گا۔
+                  {t('* To register a tenant account, enter the CNIC that your landlord has registered. Your details will be automatically matched. / * کرایہ دار کا اکاؤنٹ بنانے کے لیے وہ شناختی کارڈ نمبر لکھیں جو مالک مکان نے درج کیا ہوا ہے۔ نام خود بخود ڈیٹا بیس سے مل جائے گا۔')}
                 </p>
               </motion.div>
             )}
@@ -448,14 +474,14 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
               className="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition-all text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20 mt-4"
             >
               <UserPlus className="w-4 h-4" />
-              اکاؤنٹ رجسٹر کریں (Register New Account)
+              {t('Register New Account / اکاؤنٹ رجسٹر کریں')}
             </button>
           </form>
         )}
 
         <div className="mt-8 pt-6 border-t border-slate-800/60 text-center text-slate-500 text-[11px] leading-relaxed">
           <p className="font-semibold text-slate-400 mb-1">
-            لاگ ان کے لیے ڈیمو معلومات (Demo Login Accounts):
+            {t('Demo Login Accounts / لاگ ان کے لیے ڈیمو معلومات')}:
           </p>
           <div className="grid grid-cols-3 gap-2 text-[10px] font-mono text-indigo-400">
             <div>
@@ -463,12 +489,12 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
               admin / admin123
             </div>
             <div>
-              <strong>مالک مکان:</strong><br />
+              <strong>{t('Landlord / مالک مکان')}:</strong><br />
               owner / owner123
             </div>
             <div>
-              <strong>کرایہ دار:</strong><br />
-              (پہلے سائن اپ کریں)
+              <strong>{t('Tenant / کرایہ دار')}:</strong><br />
+              {t('(Sign up first) / (پہلے سائن اپ کریں)')}
             </div>
           </div>
         </div>

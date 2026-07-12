@@ -5,6 +5,7 @@ import {
   Clock, DollarSign, Home, User, CheckCircle2, AlertTriangle, FileText
 } from 'lucide-react';
 import { Tenant, Apartment, Building, Floor, RentPayment, User as UserType } from '../types';
+import { useTranslation } from '../utils/language';
 
 interface TenantPortalViewProps {
   currentUser: UserType;
@@ -23,7 +24,7 @@ export default function TenantPortalView({
   floors,
   payments
 }: TenantPortalViewProps) {
-  
+  const { t } = useTranslation();
   const cleanCNIC = (val: string) => val.replace(/[^0-9]/g, '');
 
   // Find the tenant profile linked to this user's CNIC
@@ -86,11 +87,10 @@ export default function TenantPortalView({
             <ShieldAlert className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-            کرایہ دار کا ریکارڈ نہیں ملا (Profile Not Linked)
+            {t('Profile Not Linked / کرایہ دار کا ریکارڈ نہیں ملا')}
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
-            پیارے کرایہ دار، آپ کا شناختی کارڈ نمبر <strong>{currentUser.cnic || 'N/A'}</strong> فعال کرایہ داروں کی لسٹ میں نہیں مل سکا۔
-            برائے مہربانی اپنے مالک مکان یا ایڈمن سے رابطہ کریں تاکہ وہ آپ کا شناختی کارڈ نمبر درست کریں۔
+            {t('Dear Resident, your CNIC / شناختی کارڈ number is not linked to any active profile. Please contact the landlord to update it. / پیارے کرایہ دار، آپ کا شناختی کارڈ نمبر فعال کرایہ داروں کی لسٹ میں نہیں مل سکا۔ برائے مہربانی اپنے مالک مکان یا ایڈمن سے رابطہ کریں۔')}
           </p>
           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-left font-mono text-xs text-slate-500 space-y-1 border border-slate-200/60 dark:border-slate-800">
             <p><strong>Username:</strong> {currentUser.username}</p>
@@ -111,13 +111,13 @@ export default function TenantPortalView({
           <div>
             <div className="flex items-center gap-2 mb-2 text-indigo-300 text-xs font-bold uppercase tracking-widest">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Tenant Portal / کرایہ دار پورٹل</span>
+              <span>{t('Tenant Portal / کرایہ دار پورٹل')}</span>
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight">
-              خوش آمدید، {tenant.fullName}
+              {t('Welcome / خوش آمدید')}, {tenant.fullName}
             </h1>
             <p className="text-slate-300 text-xs mt-1">
-              یہاں آپ اپنے کرایے، بجلی، گیس کے بلوں کی تفصیلات اور رسیدیں دیکھ سکتے ہیں۔
+              {t('Here you can see the details of your rent, electricity, gas bills and receipts. / یہاں آپ اپنے کرایے، بجلی، گیس کے بلوں کی تفصیلات اور رسیدیں دیکھ سکتے ہیں۔')}
             </p>
           </div>
           <div className="bg-slate-950/40 p-3.5 rounded-xl border border-slate-800 flex items-center gap-3">
@@ -136,7 +136,7 @@ export default function TenantPortalView({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-slate-950 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mouthly Rent / ماہانہ کرایہ</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Monthly Rent / ماہانہ کرایہ')}</p>
             <div className="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
               <DollarSign className="w-4 h-4" />
             </div>
@@ -144,12 +144,12 @@ export default function TenantPortalView({
           <p className="text-2xl font-bold dark:text-white">
             PKR {apartment?.monthlyRent.toLocaleString() || '0'}
           </p>
-          <span className="text-[10px] text-slate-400 block mt-1">ہر ماہ کی مقررہ تاریخ کو قابلِ ادائیگی</span>
+          <span className="text-[10px] text-slate-400 block mt-1">{t('Due on the due date of every month / ہر ماہ کی مقررہ تاریخ کو قابلِ ادائیگی')}</span>
         </div>
 
         <div className="bg-white dark:bg-slate-950 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Security Deposit / سیکیورٹی</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Security Deposit / سیکیورٹی')}</p>
             <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -157,25 +157,25 @@ export default function TenantPortalView({
           <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             PKR {tenant.securityDeposit.toLocaleString() || '0'}
           </p>
-          <span className="text-[10px] text-slate-400 block mt-1">قابلِ واپسی ایڈوانس سیکیورٹی ڈپازٹ</span>
+          <span className="text-[10px] text-slate-400 block mt-1">{t('Refundable Advance Security Deposit / قابلِ واپسی ایڈوانس سیکیورٹی ڈپازٹ')}</span>
         </div>
 
         <div className="bg-white dark:bg-slate-950 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Contract Remaining / معاہدہ</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Contract Remaining / معاہدہ')}</p>
             <div className="p-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-lg">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <p className="text-2xl font-bold dark:text-white">
-            {daysLeft > 0 ? `${daysLeft} Days` : 'Expired'}
+            {daysLeft > 0 ? `${daysLeft} Days` : t('Expired / زائد المیعاد')}
           </p>
-          <span className="text-[10px] text-slate-400 block mt-1">معاہدے کے خاتمے کی تاریخ: {tenant.endDate}</span>
+          <span className="text-[10px] text-slate-400 block mt-1">{t('Agreement Expiry Date / معاہدے کے خاتمے کی تاریخ')}: {tenant.endDate}</span>
         </div>
 
         <div className="bg-white dark:bg-slate-950 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Paid to Date / کل ادا شدہ</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Total Paid to Date / کل ادا شدہ')}</p>
             <div className="p-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-lg">
               <Receipt className="w-4 h-4" />
             </div>
@@ -183,7 +183,7 @@ export default function TenantPortalView({
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             PKR {totalPaid.toLocaleString()}
           </p>
-          <span className="text-[10px] text-slate-400 block mt-1">بشمول بجلی، گیس اور یوٹیلیٹی بلز</span>
+          <span className="text-[10px] text-slate-400 block mt-1">{t('Including electricity, gas and utility bills / بشمول بجلی، گیس اور یوٹیلیٹی بلز')}</span>
         </div>
       </div>
 

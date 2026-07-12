@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { RentPayment, Tenant, Apartment, Building, Floor, UserRole } from '../types';
 import { exportToCSV } from '../utils/export';
+import { useTranslation } from '../utils/language';
 
 interface RentViewProps {
   payments: RentPayment[];
@@ -17,6 +18,7 @@ interface RentViewProps {
   userRole: UserRole;
   onRecordPayment: (p: Omit<RentPayment, 'id'>) => void;
   onDeletePayment: (id: string) => void;
+  onShowAlert?: (options: any) => void;
 }
 
 export default function RentView({
@@ -27,8 +29,10 @@ export default function RentView({
   floors,
   userRole,
   onRecordPayment,
-  onDeletePayment
+  onDeletePayment,
+  onShowAlert
 }: RentViewProps) {
+  const { t } = useTranslation();
   const isReadOnly = userRole === 'read_only';
   const canDelete = userRole === 'admin' || userRole === 'landlord';
 
@@ -97,7 +101,16 @@ export default function RentView({
   const handleSubmitPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!tenantId || !paymentDate || paidAmount <= 0) {
-      alert('Please fill out all required payments details.');
+      if (onShowAlert) {
+        onShowAlert({
+          type: 'warning',
+          title: 'Missing Details / تفصیلات نامکمل ہیں',
+          text: 'Please fill out all required payment details and ensure amount is greater than zero.\nبراہ کرم تمام لازمی معلومات اور رقم فراہم کریں۔',
+          confirmButtonText: 'OK / ٹھیک ہے'
+        });
+      } else {
+        alert('Please fill out all required payments details.');
+      }
       return;
     }
 
@@ -125,6 +138,15 @@ export default function RentView({
     });
 
     setShowPaymentModal(false);
+
+    if (onShowAlert) {
+      onShowAlert({
+        type: 'success',
+        title: 'Rent Collected / کرایہ وصول ہوگیا',
+        text: `Successfully registered payment of PKR ${Number(paidAmount).toLocaleString()} for ${tenant.fullName}.\n\nMonth: ${rentMonth}/${rentYear}`,
+        confirmButtonText: 'Great / بہت اچھا'
+      });
+    }
   };
 
   // Filter history
@@ -201,9 +223,9 @@ export default function RentView({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Rent Collection / کرایہ کی وصولی</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('Rent Collection / کرایہ کی وصولی')}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-            Log monthly receipts, adjust discount packages, and track billing history / ماہانہ کرایہ کی وصولی اور کھاتہ کی تاریخ کا ریکارڈ
+            {t('Log monthly receipts, adjust discount packages, and track billing history / ماہانہ کرایہ کی وصولی اور کھاتہ کی تاریخ کا ریکارڈ')}
           </p>
         </div>
         {!isReadOnly && (
@@ -212,7 +234,7 @@ export default function RentView({
             className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 transition-colors text-white py-2 px-4 rounded-xl text-sm font-semibold cursor-pointer shadow-lg shadow-emerald-500/10"
           >
             <Plus className="w-4 h-4" />
-            Record Monthly Rent / کرایہ کا اندراج
+            {t('Record Monthly Rent / کرایہ کا اندراج')}
           </button>
         )}
       </div>
@@ -398,12 +420,12 @@ export default function RentView({
       {/* RENT COLLECTION FORM MODAL */}
       <AnimatePresence>
         {showPaymentModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
             >
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/50">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
