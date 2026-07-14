@@ -228,7 +228,7 @@ export async function fetchAllFromSupabase() {
   if (!supabase) return null;
 
   try {
-    const [bRes, fRes, aRes, tRes, pRes, lRes] = await Promise.all([
+    const fetchPromise = Promise.all([
       supabase.from('buildings').select('*'),
       supabase.from('floors').select('*'),
       supabase.from('apartments').select('*'),
@@ -237,17 +237,19 @@ export async function fetchAllFromSupabase() {
       supabase.from('logs').select('*').order('timestamp', { ascending: false }).limit(200),
     ]);
 
-    let hasErrors = false;
-    if (bRes.error) { handleDbError('Error loading buildings', bRes.error); hasErrors = true; }
-    if (fRes.error) { handleDbError('Error loading floors', fRes.error); hasErrors = true; }
-    if (aRes.error) { handleDbError('Error loading apartments', aRes.error); hasErrors = true; }
-    if (tRes.error) { handleDbError('Error loading tenants', tRes.error); hasErrors = true; }
-    if (pRes.error) { handleDbError('Error loading payments', pRes.error); hasErrors = true; }
-    if (lRes.error) { handleDbError('Error loading logs', lRes.error); hasErrors = true; }
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Supabase request timed out (30s)')), 30000)
+    );
 
-    if (hasErrors) {
-      // Return partial or empty data if some tables failed (e.g. they don't exist yet)
-    }
+    const [bRes, fRes, aRes, tRes, pRes, lRes] = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+    // Don't show error alerts for individual table failures, just log them
+    if (bRes.error) console.warn('Error loading buildings:', bRes.error);
+    if (fRes.error) console.warn('Error loading floors:', fRes.error);
+    if (aRes.error) console.warn('Error loading apartments:', aRes.error);
+    if (tRes.error) console.warn('Error loading tenants:', tRes.error);
+    if (pRes.error) console.warn('Error loading payments:', pRes.error);
+    if (lRes.error) console.warn('Error loading logs:', lRes.error);
 
     return {
       buildings: (bRes.data || []).map(mapBuildingFromDB),
@@ -258,7 +260,8 @@ export async function fetchAllFromSupabase() {
       logs: (lRes.data || []).map(mapLogFromDB),
     };
   } catch (error) {
-    handleDbError('Failed to query Supabase tables', error);
+    // Only log the error, don't show an alert
+    console.warn('Failed to query Supabase tables:', error);
     return null;
   }
 }

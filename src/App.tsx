@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building2, Users, Receipt, CalendarClock, FileBarChart, 
   Settings, LogOut, Sun, Moon, Database, Clock, ShieldAlert,
@@ -53,8 +52,25 @@ import { SweetAlert, SweetAlertOptions } from './components/SweetAlert';
 
 type TabType = 'dashboard' | 'properties' | 'tenants' | 'rent' | 'due' | 'reports' | 'extra' | 'tenant-portal';
 
+function ClockWidget() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="bg-slate-50 dark:bg-slate-900 py-1 px-3 rounded-lg border border-slate-100 dark:border-slate-800 flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+      <Clock className="w-3.5 h-3.5 text-indigo-500" />
+      <span>{time.toLocaleTimeString()} UTC</span>
+    </div>
+  );
+}
+
 export default function App() {
   const { language, setLanguage, t } = useTranslation();
+  const isRtl = language === 'ur';
 
   // Authentication state
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -68,47 +84,40 @@ export default function App() {
     return saved === 'true';
   });
 
-  // Main application state with LocalStorage/Supabase conditional initial state
+  // Main application state: start with localStorage, or empty arrays
   const [buildings, setBuildings] = useState<Building[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_buildings');
-    return saved ? JSON.parse(saved) : INITIAL_BUILDINGS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [floors, setFloors] = useState<Floor[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_floors');
-    return saved ? JSON.parse(saved) : INITIAL_FLOORS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [apartments, setApartments] = useState<Apartment[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_apartments');
-    return saved ? JSON.parse(saved) : INITIAL_APARTMENTS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [tenants, setTenants] = useState<Tenant[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_tenants');
-    return saved ? JSON.parse(saved) : INITIAL_TENANTS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [payments, setPayments] = useState<RentPayment[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_payments');
-    return saved ? JSON.parse(saved) : INITIAL_PAYMENTS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [increaseHistory, setIncreaseHistory] = useState<RentIncreaseHistory[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_increase_history');
-    return saved ? JSON.parse(saved) : INITIAL_RENT_INCREASES;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [logs, setLogs] = useState<ActivityLog[]>(() => {
-    if (isSupabaseConfigured()) return [];
     const saved = localStorage.getItem('rm_logs');
-    return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [isDbLoading, setIsDbLoading] = useState<boolean>(() => isSupabaseConfigured());
@@ -123,18 +132,13 @@ export default function App() {
     setIsAlertOpen(true);
   };
 
-  // Custom Event Listener to catch database sync warnings
+  // Custom Event Listener to catch database sync warnings (optional, just log)
   useEffect(() => {
     const handleSyncError = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail) {
-        setDbSyncError(customEvent.detail);
-        showAlert({
-          type: 'error',
-          title: 'Database Sync Error / ڈیٹا بیس کی خرابی',
-          text: `There was a problem syncing data with Supabase.\n\nContext: ${customEvent.detail.context}\nMessage: ${customEvent.detail.message}\n\n* Please make sure RLS is disabled or required columns exist.`,
-          confirmButtonText: 'Understood / سمجھ گیا'
-        });
+        console.warn('Database sync warning:', customEvent.detail);
+        // Don't show alert to user, just log it
       }
     };
     window.addEventListener('supabase-db-error', handleSyncError);
@@ -171,14 +175,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Time-ticking clock for header status bar
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Sync state back to local storage
   useEffect(() => {
     localStorage.setItem('rm_buildings', JSON.stringify(buildings));
@@ -200,6 +196,11 @@ export default function App() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [isRtl, language]);
+
   // Auth Success helper
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
@@ -220,7 +221,7 @@ export default function App() {
         setActiveTab('dashboard');
       }
     }
-  }, [currentUser]);
+  }, [currentUser, activeTab]);
 
   const handleLogout = () => {
     if (currentUser) {
@@ -709,121 +710,115 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors flex font-sans select-none antialiased">
+    <div
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className={`min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors flex font-sans select-none antialiased ${isRtl ? 'text-right' : 'text-left'}`}
+    >
       
       {/* MOBILE DRAWER NAVIGATION */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-            {/* Backdrop overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
-            />
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop overlay */}
+          <div
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+          />
 
-            {/* Sidebar content */}
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-72 max-w-[80vw] bg-slate-900 dark:bg-slate-950 border-r border-slate-800 dark:border-slate-900 h-full flex flex-col justify-between p-0 text-slate-400 z-10 shadow-2xl"
-            >
-              <div>
-                {/* Close button & Brand */}
-                <div className="p-6 border-b border-slate-800 dark:border-slate-900 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-500 rounded-lg text-white shadow-lg shadow-indigo-500/30">
-                      <Building2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="font-extrabold text-white tracking-tight text-sm block">Rental Elite</span>
-                      <span className="text-[10px] text-slate-500 block font-semibold">Management System</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Tab lists */}
-                <nav className="p-4 space-y-1">
-                  {(currentUser.role === 'tenant'
-                    ? [{ id: 'tenant-portal', label: 'My Rent Portal / میرا رینٹ پورٹل', icon: Receipt }]
-                    : [
-                        { id: 'dashboard', label: 'Dashboard / ڈیش بورڈ', icon: Building2 },
-                        { id: 'properties', label: 'Properties & Houses / جائیدادیں', icon: Settings },
-                        { id: 'tenants', label: 'Tenant Directory / کرایہ دار', icon: Users },
-                        { id: 'rent', label: 'Rent Ledger / کرایہ کا کھاتہ', icon: Receipt },
-                        { id: 'due', label: 'Due & Renewals / واجبات', icon: CalendarClock },
-                        { id: 'reports', label: 'Reports & Compiler / رپورٹ', icon: FileBarChart },
-                        { id: 'extra', label: 'Backup & Audit / بیک اپ اور آڈٹ', icon: Database }
-                      ]
-                  ).map((tab) => {
-                    const isSelected = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          setActiveTab(tab.id as any);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className={`w-full text-left py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-3 ${
-                          isSelected 
-                            ? 'bg-slate-800 text-white font-bold' 
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                        }`}
-                      >
-                        <tab.icon className={`w-4 h-4 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
-                        {t(tab.label)}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
-
-              {/* User Identity bottom footer */}
-              <div className="p-4 border-t border-slate-800 dark:border-slate-900 space-y-3 bg-slate-950/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold font-mono text-sm uppercase">
-                    {currentUser.username.substring(0, 2)}
+          {/* Sidebar content */}
+          <aside
+            className="relative w-72 max-w-[80vw] bg-slate-900 dark:bg-slate-950 border-r border-slate-800 dark:border-slate-900 h-full flex flex-col justify-between p-0 text-slate-400 z-10 shadow-2xl"
+          >
+            <div>
+              {/* Close button & Brand */}
+              <div className={`p-6 border-b border-slate-800 dark:border-slate-900 flex items-center ${isRtl ? 'flex-row-reverse justify-between' : 'justify-between'}`}>
+                <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                  <div className="p-2 bg-indigo-500 rounded-lg text-white shadow-lg shadow-indigo-500/30">
+                    <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="font-bold text-white block text-xs truncate max-w-[120px]">{currentUser.username}</span>
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">
-                      {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
-                    </span>
+                    <span className="font-extrabold text-white tracking-tight text-sm block">Rental Elite</span>
+                    <span className="text-[10px] text-slate-500 block font-semibold">Management System</span>
                   </div>
                 </div>
-
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 border border-slate-800 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all py-1.5 px-3 rounded-lg text-[10px] text-slate-400 font-bold cursor-pointer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
-                  {t('End Session / سیشن ختم کریں')}
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            </motion.aside>
-          </div>
-        )}
-      </AnimatePresence>
+
+              {/* Tab lists */}
+              <nav className="p-4 space-y-1">
+                {(currentUser.role === 'tenant'
+                  ? [{ id: 'tenant-portal', label: 'My Rent Portal / میرا رینٹ پورٹل', icon: Receipt }]
+                  : [
+                      { id: 'dashboard', label: 'Dashboard / ڈیش بورڈ', icon: Building2 },
+                      { id: 'properties', label: 'Properties & Houses / جائیدادیں', icon: Settings },
+                      { id: 'tenants', label: 'Tenant Directory / کرایہ دار', icon: Users },
+                      { id: 'rent', label: 'Rent Ledger / کرایہ کا کھاتہ', icon: Receipt },
+                      { id: 'due', label: 'Due & Renewals / واجبات', icon: CalendarClock },
+                      { id: 'reports', label: 'Reports & Compiler / رپورٹ', icon: FileBarChart },
+                      { id: 'extra', label: 'Backup & Audit / بیک اپ اور آڈٹ', icon: Database }
+                    ]
+                ).map((tab) => {
+                  const isSelected = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id as any);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-3 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'} ${
+                        isSelected 
+                          ? 'bg-slate-800 text-white font-bold' 
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      }`}
+                    >
+                      <tab.icon className={`w-4 h-4 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
+                      {t(tab.label)}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* User Identity bottom footer */}
+            <div className="p-4 border-t border-slate-800 dark:border-slate-900 space-y-3 bg-slate-950/40">
+              <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold font-mono text-sm uppercase">
+                  {currentUser.username.substring(0, 2)}
+                </div>
+                <div className={isRtl ? 'text-right' : 'text-left'}>
+                  <span className="font-bold text-white block text-xs truncate max-w-[120px]">{currentUser.username}</span>
+                  <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">
+                    {t('Signed in / سائن ان')}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 border border-slate-800 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all py-1.5 px-3 rounded-lg text-[10px] text-slate-400 font-bold cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                {t('End Session / سیشن ختم کریں')}
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* SIDEBAR NAVIGATION */}
       <aside className="w-64 border-r border-slate-800 dark:border-slate-900 bg-slate-900 dark:bg-slate-950 flex flex-col justify-between shrink-0 h-screen sticky top-0 hidden md:flex text-slate-400">
         <div>
           
           {/* Logo Brand */}
-          <div className="p-6 border-b border-slate-800 dark:border-slate-900 flex items-center gap-3">
+          <div className={`p-6 border-b border-slate-800 dark:border-slate-900 flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
             <div className="p-2 bg-indigo-500 rounded-lg text-white shadow-lg shadow-indigo-500/30">
               <Building2 className="w-5 h-5" />
             </div>
@@ -852,7 +847,7 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full text-left py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-3 ${
+                  className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-3 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'} ${
                     isSelected 
                       ? 'bg-slate-800 text-white font-bold' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -868,14 +863,14 @@ export default function App() {
 
         {/* User Identity bottom footer */}
         <div className="p-4 border-t border-slate-800 dark:border-slate-900 space-y-3 bg-slate-950/40">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
             <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold font-mono text-sm uppercase">
               {currentUser.username.substring(0, 2)}
             </div>
-            <div>
+            <div className={isRtl ? 'text-right' : 'text-left'}>
               <span className="font-bold text-white block text-xs truncate max-w-[120px]">{currentUser.username}</span>
               <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wide block font-mono">
-                {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
+                {t('Signed in / سائن ان')}
               </span>
             </div>
           </div>
@@ -891,21 +886,18 @@ export default function App() {
       </aside>
 
       {/* MAIN VIEW CONTENT CONTAINER */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+      <main className="flex-1 flex flex-col min-w-0 md:h-screen md:overflow-y-auto">
         
         {/* TOP STATUS BAR HEADER */}
-        <header className="bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 py-3.5 px-6 flex items-center justify-between sticky top-0 z-40">
+        <header className={`bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 py-3.5 px-6 flex items-center justify-between sticky top-0 z-40 ${isRtl ? 'flex-row-reverse' : ''}`}>
           
           {/* Left: Clock / mobile layout launcher */}
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-50 dark:bg-slate-900 py-1 px-3 rounded-lg border border-slate-100 dark:border-slate-800 flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
-              <Clock className="w-3.5 h-3.5 text-indigo-500" />
-              <span>{currentTime.toLocaleTimeString()} UTC</span>
-            </div>
+          <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <ClockWidget />
           </div>
 
           {/* Center/Right controls */}
-          <div className="flex items-center gap-4">
+          <div className={`flex items-center gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
             
             {/* Language Switcher */}
             <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 text-[10px] font-extrabold shadow-inner">
@@ -948,9 +940,6 @@ export default function App() {
               <span>{t('Menu / مینیو')}</span>
             </button>
 
-            <span className="text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 dark:bg-slate-900 text-emerald-500 border border-emerald-500/20 py-1 px-2.5 rounded-lg font-mono">
-              {t(`Role: ${currentUser.role} / عہدہ: ${currentUser.role}`)}
-            </span>
           </div>
 
         </header>
@@ -984,15 +973,8 @@ export default function App() {
         )}
 
         {/* COMPONENT ROUTER CONTAINER */}
-        <section className="p-6 max-w-7xl w-full mx-auto flex-1">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.15 }}
-            >
+        <section className={`p-6 max-w-7xl w-full mx-auto flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+          <div key={activeTab} className="transition-all duration-200">
               {activeTab === 'dashboard' && (
                 <DashboardView 
                   metrics={metrics}
@@ -1099,8 +1081,7 @@ export default function App() {
                   payments={payments}
                 />
               )}
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </section>
 
       </main>

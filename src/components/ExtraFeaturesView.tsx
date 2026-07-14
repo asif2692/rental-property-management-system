@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { 
   Database, ShieldCheck, Download, Upload, Trash2, HelpCircle, 
   Settings, RefreshCw, Sun, Moon, AlertTriangle, UserCheck, Cloud, CheckCircle, Info

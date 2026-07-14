@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, Search, Filter, Plus, FileText, Image as ImageIcon, 
   Phone, Mail, MapPin, Briefcase, Calendar, DollarSign, 
@@ -395,7 +394,7 @@ export default function TenantView({
           const bldg = apt ? buildings.find(b => b.id === apt.buildingId) : null;
 
           return (
-            <motion.div
+            <div
               key={t.id}
               whileHover={{ y: -2 }}
               className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
@@ -478,7 +477,7 @@ export default function TenantView({
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           );
         })}
 
@@ -492,14 +491,14 @@ export default function TenantView({
       </div>
 
       {/* DETAIL MODAL */}
-      <AnimatePresence>
+      <>
         {selectedTenant && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <button 
                 onClick={() => setSelectedTenant(null)} 
@@ -573,7 +572,7 @@ export default function TenantView({
                   {/* Documents Section */}
                   <div>
                     <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Scanned Documents & Attachments</h4>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { label: 'CNIC Front', url: selectedTenant.cnicFrontUrl },
                         { label: 'CNIC Back', url: selectedTenant.cnicBackUrl },
@@ -609,20 +608,20 @@ export default function TenantView({
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* FORM MODAL */}
-      <AnimatePresence>
+      <>
         {showFormModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/50">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -843,7 +842,7 @@ export default function TenantView({
                 </div>
 
                 {/* Scans file inputs */}
-                <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl">
                   <div>
                     <label className="block text-slate-700 dark:text-slate-300 font-bold text-[10px] uppercase mb-1">CNIC Front Scan</label>
                     <input 
@@ -914,10 +913,10 @@ export default function TenantView({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
     </div>
   );

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { 
   Building, Layers, Home, UserCheck, UserX, Landmark, 
   Hourglass, TrendingUp, Calendar, AlertTriangle, 
@@ -86,7 +85,7 @@ export default function DashboardView({
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
           { 
             title: 'Total Buildings / کل عمارتیں', 
@@ -117,11 +116,8 @@ export default function DashboardView({
             desc: `${metrics.vacantCount} vacant properties / خالی فلیٹ` 
           }
         ].map((kpi, idx) => (
-          <motion.div
+          <div
             key={idx}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
             className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
           >
             <div className="flex items-start justify-between">
@@ -140,7 +136,7 @@ export default function DashboardView({
             <div className="border-t border-slate-100 dark:border-slate-700/50 mt-4 pt-2.5 text-xs text-slate-400 dark:text-slate-400 font-mono">
               {t(kpi.desc)}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -180,11 +176,8 @@ export default function DashboardView({
             desc: `Expected: ${formatPKR(Math.round(metrics.expectedAnnualIncome))} / متوقع`
           }
         ].map((fKpi, idx) => (
-          <motion.div
+          <div
             key={idx}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: (idx + 4) * 0.05 }}
             className={`p-5 rounded-2xl border ${fKpi.bg} shadow-sm hover:shadow-md transition-all flex flex-col justify-between group`}
           >
             <div className="flex items-start justify-between">
@@ -203,15 +196,13 @@ export default function DashboardView({
             <div className="mt-4 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400">
               {t(fKpi.desc)}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* NumPy Statistics Panel */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 border border-slate-700/80 shadow-xl relative overflow-hidden"
+      <div 
+        className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 border border-slate-700/80 shadow-xl relative overflow-hidden transition-all"
       >
         <div className="absolute right-0 bottom-0 translate-x-10 translate-y-10 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute left-1/3 top-0 -translate-y-10 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -226,8 +217,8 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-          <div className="border-r border-slate-700/50 last:border-0 pr-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
+          <div className="border-b sm:border-b-0 sm:border-r border-slate-700/50 pb-4 sm:pb-0 sm:pr-4">
             <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Average Rent / اوسط کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-emerald-400 block mt-1">
               {formatPKR(Math.round(metrics.averageRent))}
@@ -235,7 +226,7 @@ export default function DashboardView({
             <span className="text-[10px] text-slate-500">{t('Arithmetic Mean / اوسط قیمت')}</span>
           </div>
 
-          <div className="border-r border-slate-700/50 last:border-0 pr-4">
+          <div className="border-b sm:border-b-0 sm:border-r border-slate-700/50 pb-4 sm:pb-0 sm:pr-4">
             <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Median Rent / درمیانی کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-indigo-400 block mt-1">
               {formatPKR(Math.round(metrics.medianRent))}
@@ -243,7 +234,7 @@ export default function DashboardView({
             <span className="text-[10px] text-slate-500">{t('50th Percentile / درمیانی شرح')}</span>
           </div>
 
-          <div className="border-r border-slate-700/50 last:border-0 pr-4">
+          <div className="border-b sm:border-b-0 sm:border-r border-slate-700/50 pb-4 sm:pb-0 sm:pr-4">
             <span className="text-xs text-slate-400 uppercase tracking-wider block">{t('Maximum Rent / زیادہ سے زیادہ کرایہ')}</span>
             <span className="text-xl font-bold font-mono text-amber-400 block mt-1">
               {formatPKR(metrics.maxRent)}
@@ -259,7 +250,7 @@ export default function DashboardView({
             <span className="text-[10px] text-slate-500">{t('Min Floor / سب سے کم کرایہ')}</span>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -335,14 +326,14 @@ export default function DashboardView({
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-2 text-center mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center mt-4">
             {occupancyPieData.map((d, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{d.value}</span>
+              <div key={idx} className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx] }} />
+                  <span className="text-[10px] text-slate-400">{d.name}</span>
                 </div>
-                <span className="text-[10px] text-slate-400">{d.name}</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono">{d.value}</span>
               </div>
             ))}
           </div>

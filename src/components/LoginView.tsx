@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { KeyRound, ShieldAlert, Lock, User as UserIcon, UserCheck, ShieldCheck, UserPlus, CreditCard } from 'lucide-react';
 import { User, UserRole, Tenant } from '../types';
 import { useTranslation } from '../utils/language';
@@ -33,13 +32,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('rm_registered_users');
     if (saved) return JSON.parse(saved);
-    
-    // Default mock accounts
-    return [
-      { username: 'admin', role: 'admin', fullName: 'Sajid Khan (Admin)', password: 'admin123' },
-      { username: 'owner', role: 'landlord', fullName: 'Malik Mohammad (Landlord)', password: 'owner123' },
-      { username: 'manager', role: 'manager', fullName: 'Sajid Ahmed (Manager)', password: 'manager123' },
-    ];
+    return [];
   });
 
   // Keep localStorage synced
@@ -177,12 +170,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="relative w-full max-w-lg bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800 p-8 shadow-2xl z-10"
-      >
+      <div className="relative w-full max-w-lg bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800 p-8 shadow-2xl z-10 transition-all">
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600/10 text-indigo-400 rounded-2xl border border-indigo-500/20 mb-4 shadow-inner">
@@ -195,6 +183,14 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             {t('Admin • Landlord • Tenant / ایڈمن • مالک مکان • کرایہ دار')}
           </p>
         </div>
+
+        {/* First-time setup notice */}
+        {registeredUsers.length === 0 && (
+          <div className="mb-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-300 text-xs text-center">
+            <div className="font-bold mb-1">{t('First time setup? Sign up as Admin first! / پہلی بار استعمال کر رہے ہیں؟ پہلے ایڈمن کے طور پر سائن اپ کریں!')}</div>
+            <p className="opacity-90">{t('Create your Admin account first, then you can add tenants later. / پہلے اپنا ایڈمن اکاؤنٹ بنائیں، پھر بعد میں کرایہ دار بنا سکتے ہیں۔')}</p>
+          </div>
+        )}
 
         {/* Tab Selector */}
         <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-6">
@@ -225,31 +221,19 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
         </div>
 
         {/* Error or Success notification */}
-        <AnimatePresence mode="wait">
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-300 text-xs whitespace-pre-line"
-            >
-              <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
-              <span>{t(error)}</span>
-            </motion.div>
-          )}
+        {error && (
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-300 text-xs whitespace-pre-line transition-all">
+            <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+            <span>{t(error)}</span>
+          </div>
+        )}
 
-          {success && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3 text-emerald-300 text-xs whitespace-pre-line"
-            >
-              <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
-              <span>{t(success)}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {success && (
+          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3 text-emerald-300 text-xs whitespace-pre-line transition-all">
+            <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
+            <span>{t(success)}</span>
+          </div>
+        )}
 
         {activeTab === 'signin' ? (
           /* ================= SIGN IN FORM ================= */
@@ -270,24 +254,8 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                     type="button"
                     onClick={() => {
                       setSignInRole(r as UserRole);
-                      // Auto-fills for test accessibility
-                      if (r === 'admin') {
-                        setSignInUsername('admin');
-                        setSignInPassword('admin123');
-                      } else if (r === 'landlord') {
-                        setSignInUsername('owner');
-                        setSignInPassword('owner123');
-                      } else {
-                        // Find first registered tenant to make it easy to login for them
-                        const matchedTenantUser = registeredUsers.find(usr => usr.role === 'tenant');
-                        if (matchedTenantUser) {
-                          setSignInUsername(matchedTenantUser.username);
-                          setSignInPassword(matchedTenantUser.password || '');
-                        } else {
-                          setSignInUsername('');
-                          setSignInPassword('');
-                        }
-                      }
+                      setSignInUsername('');
+                      setSignInPassword('');
                     }}
                     className={`py-2.5 px-3 rounded-lg border transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                       signInRole === r 
@@ -441,9 +409,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                 </div>
               </div>
             ) : (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+              <div
                 className="space-y-1.5"
               >
                 <label className="block text-slate-300 text-xs font-bold uppercase tracking-wider flex justify-between">
@@ -466,7 +432,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
                 <p className="text-[10px] text-amber-400/90 leading-relaxed pt-1">
                   {t('* To register a tenant account, enter the CNIC that your landlord has registered. Your details will be automatically matched. / * کرایہ دار کا اکاؤنٹ بنانے کے لیے وہ شناختی کارڈ نمبر لکھیں جو مالک مکان نے درج کیا ہوا ہے۔ نام خود بخود ڈیٹا بیس سے مل جائے گا۔')}
                 </p>
-              </motion.div>
+              </div>
             )}
 
             <button
@@ -478,27 +444,7 @@ export default function LoginView({ tenants, onLoginSuccess }: LoginViewProps) {
             </button>
           </form>
         )}
-
-        <div className="mt-8 pt-6 border-t border-slate-800/60 text-center text-slate-500 text-[11px] leading-relaxed">
-          <p className="font-semibold text-slate-400 mb-1">
-            {t('Demo Login Accounts / لاگ ان کے لیے ڈیمو معلومات')}:
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-[10px] font-mono text-indigo-400">
-            <div>
-              <strong>ADMIN:</strong><br />
-              admin / admin123
-            </div>
-            <div>
-              <strong>{t('Landlord / مالک مکان')}:</strong><br />
-              owner / owner123
-            </div>
-            <div>
-              <strong>{t('Tenant / کرایہ دار')}:</strong><br />
-              {t('(Sign up first) / (پہلے سائن اپ کریں)')}
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

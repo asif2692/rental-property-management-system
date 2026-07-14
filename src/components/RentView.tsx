@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   CreditCard, Plus, Search, Filter, Trash2, Landmark, 
   Receipt, DollarSign, Calendar, Info, Check, X, AlertCircle,
@@ -418,14 +417,14 @@ export default function RentView({
       </div>
 
       {/* RENT COLLECTION FORM MODAL */}
-      <AnimatePresence>
+      <>
         {showPaymentModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/50">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
@@ -565,7 +564,7 @@ export default function RentView({
                     />
                   </div>
 
-                  <div className="col-span-2 grid grid-cols-2 gap-3 bg-indigo-50/30 dark:bg-slate-900/50 p-3 rounded-xl border border-indigo-100/50 dark:border-slate-800">
+                  <div className="col-span-1 sm:col-span-2 grid grid-cols-2 gap-3 bg-indigo-50/30 dark:bg-slate-900/50 p-3 rounded-xl border border-indigo-100/50 dark:border-slate-800">
                     <div>
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Remaining Balance</span>
                       <span className={`text-sm font-bold font-mono mt-1 block ${remainingBalance === 0 ? 'text-slate-500' : remainingBalance > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
@@ -643,10 +642,10 @@ export default function RentView({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
     </div>
   );

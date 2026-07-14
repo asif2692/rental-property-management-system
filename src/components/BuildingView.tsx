@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building as BuildingIcon, Layers, Home, Plus, Edit2, 
   Trash2, MapPin, AlignLeft, Info, HelpCircle, Save, X 
@@ -216,7 +215,7 @@ export default function BuildingView({
           const occupiedCount = apts.filter(a => a.status === 'Occupied').length;
           
           return (
-            <motion.div
+            <div
               key={b.id}
               whileHover={{ y: -2 }}
               onClick={() => setSelectedBuildingId(b.id)}
@@ -270,7 +269,7 @@ export default function BuildingView({
                 </span>
                 <span>{occupiedCount}/{apts.length} Occupied</span>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -425,14 +424,14 @@ export default function BuildingView({
       )}
 
       {/* BUILDING MODAL */}
-      <AnimatePresence>
+      <>
         {showBuildingModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -505,20 +504,20 @@ export default function BuildingView({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* FLOOR MODAL */}
-      <AnimatePresence>
+      <>
         {showFloorModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -576,20 +575,20 @@ export default function BuildingView({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* APARTMENT MODAL */}
-      <AnimatePresence>
+      <>
         {showAptModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-4 z-50 overflow-y-auto sm:items-center">
-            <motion.div 
+            <div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-auto sm:my-8"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative my-4 sm:my-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -601,7 +600,7 @@ export default function BuildingView({
               </div>
 
               <form onSubmit={handleSaveApt} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
                       Apartment Number *
@@ -631,7 +630,7 @@ export default function BuildingView({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
                       Floor Assignment
@@ -693,10 +692,10 @@ export default function BuildingView({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
     </div>
   );

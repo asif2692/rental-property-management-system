@@ -40,12 +40,9 @@ export function useTranslation() {
   });
 
   useEffect(() => {
-    const handleLangChange = () => {
-      setLanguageState((localStorage.getItem('rm_language') as Language) || 'ur');
-    };
-    window.addEventListener('language-change', handleLangChange);
-    return () => window.removeEventListener('language-change', handleLangChange);
-  }, []);
+    document.documentElement.dir = language === 'ur' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
 
   const t = (text: string): string => {
     return translateText(text, language);
@@ -54,7 +51,6 @@ export function useTranslation() {
   const setLanguage = (lang: Language) => {
     localStorage.setItem('rm_language', lang);
     setLanguageState(lang);
-    window.dispatchEvent(new Event('language-change'));
   };
 
   return { language, setLanguage, t };

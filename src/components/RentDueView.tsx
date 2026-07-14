@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   AlertTriangle, Calendar, TrendingUp, RefreshCw, Zap, 
   HelpCircle, Check, Play, History, ShieldAlert, BadgePercent, Clock,
@@ -563,7 +562,7 @@ export default function RentDueView({
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-2">Increase Percentage Rule</label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[10, 12, 15, 0].map((val) => (
                       <button
                         key={val}
@@ -854,10 +853,10 @@ export default function RentDueView({
       )}
 
       {/* LEASE RENEWAL NOTIFICATION DESK MODAL */}
-      <AnimatePresence>
+      <>
         {notifyingTenant && (
           <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-start justify-center p-4 z-50 overflow-y-auto select-none font-sans sm:items-center">
-            <motion.div
+            <div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -886,7 +885,7 @@ export default function RentDueView({
               {/* Modal Content */}
               <div className="p-5 space-y-4">
                 {notificationSuccess ? (
-                  <motion.div 
+                  <div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="py-6 text-center space-y-3"
@@ -912,7 +911,7 @@ export default function RentDueView({
                     >
                       {t('Done / ٹھیک ہے')}
                     </button>
-                  </motion.div>
+                  </div>
                 ) : (
                   <>
                     {/* Tenant Info Quick Specs */}
@@ -1085,10 +1084,10 @@ export default function RentDueView({
                   </>
                 )}
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </>
 
     </div>
   );

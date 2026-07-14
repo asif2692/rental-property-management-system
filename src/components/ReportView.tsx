@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { 
   FileSpreadsheet, FileText, Printer, BarChart3, TrendingUp, PieChart as PieIcon, 
   Percent, ShieldCheck, UserCheck, CalendarDays, ArrowUpRight, HelpCircle, Table 

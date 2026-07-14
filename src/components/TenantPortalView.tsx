@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { 
   Building2, Calendar, Receipt, CreditCard, ShieldAlert, 
   Clock, DollarSign, Home, User, CheckCircle2, AlertTriangle, FileText
@@ -78,10 +77,8 @@ export default function TenantPortalView({
   if (!tenant) {
     return (
       <div className="max-w-3xl mx-auto py-12 px-4">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white dark:bg-slate-950 p-8 rounded-2xl border border-rose-500/20 shadow-xl text-center"
+        <div 
+          className="bg-white dark:bg-slate-950 p-8 rounded-2xl border border-rose-500/20 shadow-xl text-center transition-all"
         >
           <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-500/10 text-rose-500 rounded-2xl mb-4">
             <ShieldAlert className="w-8 h-8" />
@@ -97,7 +94,7 @@ export default function TenantPortalView({
             <p><strong>Linked CNIC:</strong> {currentUser.cnic || 'Not Specified'}</p>
             <p><strong>Role:</strong> {currentUser.role}</p>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
